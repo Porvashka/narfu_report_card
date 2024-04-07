@@ -1,0 +1,68 @@
+body {
+    margin:0;
+    padding:0;
+}
+
+.logo{
+    border:none;
+    margin:4px;
+    margin-left: 8px;
+    background: #193B70;
+}
+
+.header {
+    width: 100%; /* Фиксированная ширина контейнера */
+
+    display: block; /* Или можете использовать display: inline-block; */
+    background: #193B70;
+    line-height: 40px;
+    position:fixed;
+    z-index: 9999;
+}
+
+.navigation_bar {
+    display:inline-block;
+ }
+
+.navi_button1 {
+    margin-left: 8px;
+    margin-right: 8px;
+    position: relative;
+    background: #E3E4E5;
+    border:none;
+    border-radius:7px;
+    padding: 0.6em 1em;
+}
+
+.username_label {
+    position: relative;
+    color: white;
+    font-family:sans-serif;
+    font-size:14px;
+}
+
+.post {
+    padding: 5px;
+    position:relative;
+    display:inline-block;
+    float: right;
+    line-height: 25px;
+}
+.text_login_form {
+    padding: 0 0 0 7px;
+    margin: 0 0.5em 0 0;
+    border-radius: 4px;
+    border: none;
+    line-height: 40px;
+    font-size: 14px;
+}
+
+.container {
+  position: relative;
+
+}
+.child {
+    position: relative;
+    background: #A7C5FF;
+    height:100vh;
+}
