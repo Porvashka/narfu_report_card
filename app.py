@@ -74,7 +74,15 @@ def logout():
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    return render_template('about.html')
+    schedule_data = [
+        ("Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"),
+        ("Занятие 1", "Занятие 3", "", "", "Занятие 6", ""),
+        ("Занятие 2", "", "", "", "", ""),
+        ("", "", "", "Занятие 5", "", ""),
+        ("", "", "Занятие 4", "", "", ""),
+        ("", "", "", "", "", ""),
+        ("", "", "", "", "Занятие 7", "")]
+    return render_template('about.html', schedule_data=schedule_data)
 
 @app.route('/add_user', methods=['GET', 'POST'])
 @login_required
