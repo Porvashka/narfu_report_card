@@ -1,107 +1,77 @@
-from flask import Flask, request, redirect, url_for, render_template
-from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
-import json
+from flask import Flask, request, redirect, url_for, render_template, jsonify
+import psycopg2
+from auth import get_lesson_id, authorization, get_students_postgres, print_lessons
+from datetime import datetime
+from collections import OrderedDict
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key_here'  # Замените на ваш секретный ключ
+app.secret_key = 'your_secret_key_here'
 
-login_manager = LoginManager()
-login_manager.init_app(app)
+def get_db_connection():
+    conn = psycopg2.connect(
+        dbname="test",
+        user="postgres",
+        password="12345",
+        host="localhost",
+        port="5432"
+    )
+    return conn
 
-# Пример класса модели пользователя
-class User(UserMixin):
-    def __init__(self, id, username, password, last_name, first_name, middle_name, group_number):
-        self.id = id
-        self.username = username
-        self.password = password
-        self.last_name = last_name
-        self.first_name = first_name
-        self.middle_name = middle_name
-        self.group_number = group_number
-
-# Пример функции загрузки пользователя из JSON
-def load_user(user_id):
-    with open('users.json', 'r') as f:
-        users = json.load(f)
-        user_data = users.get(user_id)
-        if user_data:
-            return User(user_id, user_data['username'], user_data['password'],
-                        user_data['last_name'], user_data['first_name'],
-                        user_data['middle_name'], user_data['group_number'])
-
-@login_manager.user_loader
-def load_user_by_id(user_id):
-    return load_user(user_id)
-
-# Функция для добавления новых пользователей из файла new_users.json
-def add_new_user(user_data):
-    with open('users.json', 'r+') as users_file:
-        users_data = json.load(users_file)
-        users_data.update(user_data)
-        users_file.seek(0)
-        json.dump(users_data, users_file)
-        users_file.truncate()
-
-
-@app.route('/', methods=['GET', 'POST'])
-def index():
-    return render_template('index.html')
-
-# Маршрут для входа в систему
-@app.route('/login', methods=['GET', 'POST'])
+@app.route('/', methods = ['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        username = request.form['login']
+        login = request.form['login']
         password = request.form['password']
-        with open('users.json', 'r') as f:
-            users = json.load(f)
-            for user_id, user_data in users.items():
-                if user_data['username'] == username and user_data['password'] == password:
-                    user = load_user(user_id)
-                    login_user(user)
-                    return redirect(url_for('dashboard'))
-        return 'Invalid username or password'
-    return render_template('index.html')
+        token = authorization(login, password)
+        return redirect(url_for('main', token=token))
+    return render_template('login.html')
 
-# Маршрут для выхода из системы
-@app.route('/logout')
-@login_required
-def logout():
-    logout_user()
-    return 'Logged out successfully'
-
-# Защищенный маршрут
-@app.route('/dashboard')
-@login_required
-def dashboard():
-    schedule_data = [
-        ("Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"),
-        ("Занятие 1", "Занятие 3", "", "", "Занятие 6", ""),
-        ("Занятие 2", "", "", "", "", ""),
-        ("", "", "", "Занятие 5", "", ""),
-        ("", "", "Занятие 4", "", "", ""),
-        ("", "", "", "", "", ""),
-        ("", "", "", "", "Занятие 7", "")]
-    return render_template('about.html', schedule_data=schedule_data)
-
-@app.route('/add_user', methods=['GET', 'POST'])
-@login_required
-def add_user():
+@app.route('/marks', methods = ['GET', 'POST'])
+def index(token):
     if request.method == 'POST':
-        user_data = {
-            request.form['id']: {
-                'id': request.form['id'],
-                'username': request.form['username'],
-                'password': request.form['password'],
-                'last_name': request.form['last_name'],
-                'first_name': request.form['first_name'],
-                'middle_name': request.form['middle_name'],
-                'group_number': request.form['group_number']
-            }
-        }
-        add_new_user(user_data)
-        return redirect(url_for('dashboard'))
-    return render_template('add_user.html')
+        idd = request.form['id']
+        id_lesson = request.form['id_lesson']
+        new_data = request.form['data']
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute(f"""UPDATE hsitas."{id_lesson}" SET data = %s WHERE name_student = %s""", (new_data, idd))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return redirect(url_for(endpoint='main', token=token, _method='POST'))
+
+@app.route('/main', methods=['GET', 'POST'])
+def main(token):
+    # token = request.headers.get('Authorization')
+    lessons = print_lessons('Коткин Денис', token)['_embedded']
+    lessons_events = lessons['events']
+    lessons_sorted = sorted(lessons_events, key=lambda x: x["start"])
+    grouped_data = OrderedDict()
+
+    for item in lessons_sorted:
+        date_object = datetime.fromisoformat(item["start"])
+        day = date_object.date()
+        if day not in grouped_data:
+            grouped_data[day] = {"objects": []}
+        grouped_data[day]["objects"].append(item)
+    courses_links = lessons['course-unit-realizations']
+    for day, data in grouped_data.items():
+        for lesson in data["objects"]:
+            for course_link in courses_links:
+                if lesson['_links']['course-unit-realization']['href'][1:] == course_link['id']:
+                    lesson['course-name'] = course_link['name']
+                    break
+
+    if request.method == 'POST':
+        id_lesson = request.form['id_lesson']
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute(f"""SELECT name_student, data FROM hsitas."{id_lesson}";""")
+        rows = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return render_template('index.html', grouped_data=grouped_data, rows=rows, token=token, id_lesson=id_lesson)
+    return render_template('index.html', grouped_data=grouped_data, token=token)
 
 if __name__ == '__main__':
     app.run(debug=True)

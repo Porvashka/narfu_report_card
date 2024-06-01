@@ -1,9 +1,37 @@
-{% extends 'base.html' %}
+{% extends 'lesson.html' %}
 
 {% block title %}
 Главная страница
 {% endblock %}
 
 {% block body %}
-
+<body>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Data</th>
+                <th>Update Data</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+            <tr>
+                <td>{{ row[0] }}</td>
+                <td>{{ row[1] }}</td>
+                <td>
+                    <form method="post" action="{{ url_for('index', token=token, id_lesson=id_lesson) }}">
+                        <input type="hidden" name="id" value="{{ row[0] }}">
+                        <input type="hidden" name="id_lesson" value="{{ id_lesson }}">
+                        <select name="data">
+                             
+                        </select>
+                        <button type="submit">Update</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
 {% endblock %}

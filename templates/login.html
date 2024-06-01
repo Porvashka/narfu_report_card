@@ -1,18 +1,18 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Авторизация</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
 </head>
 <body>
-    <h1>Вход</h1>
-    <form method="post" action="/login">
-        <label for="login">Имя пользователя:</label>
-        <input type="text" id="login" name="login"><br><br>
-
-        <label for="password">Пароль:</label>
+    <h2>Login</h2>
+    <form method="post" action="{{ url_for('login') }}">
+        <label for="login">Login:</label><br>
+        <input type="text" id="login" name="login"><br>
+        <label for="password">Password:</label><br>
         <input type="password" id="password" name="password"><br><br>
-
-        <input type="submit" value="Войти">
+        <input type="submit" value="Submit">
     </form>
 </body>
 </html>

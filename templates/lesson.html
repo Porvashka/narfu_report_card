@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <title>Список уроков</title>
+    <style>
+        .container {
+            display: flex;
+        }
+
+        .lesson-list {
+            flex: 1;
+            margin-right: 20px;
+        }
+
+        .sidebar {
+            flex: 2;
+            background-color: #f0f0f0;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        li {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+
+        .course-name {
+            float: left;
+            width: 100px;
+            margin-right: 10px;
+            word-wrap: break-word;
+        }
+
+        .lesson-details {
+            display: none;
+        }
+
+        .lesson-details {
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            margin-top: 5px;
+        }
+
+        .lesson-details ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .lesson-details li {
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Список уроков</h1>
+    <div class="container">
+        <div class="lesson-list">
+            {% for day, data in grouped_data.items() %}
+                <h2>День: {{ day }}</h2>
+                <ul>
+                    {% for item in data['objects'] %}
+                        <li>
+                            <p class="course-name">{{ item['course-name'] }}</p>
+                            <form method="post" action="{{ url_for('main', token=token) }}">
+                                <input type="hidden" name="id_lesson" value="{{ item['id'] }}">
+                                <p>{{ item['name'] }}</p>
+                                <p>Начало: {{ item['start'] }}</p>
+                                <p>Конец: {{ item['end'] }}</p>
+                                <p>id: {{ item['id'] }}</p>
+                                <button type="submit">Update</button>
+                            </form>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endfor %}
+        </div>
+        <div class="sidebar" id="sidebar">
+            <h2>Список студентов</h2>
+            {% block body %}{% endblock %}
+        </div>
+    </div>
+</body>
+</html>
