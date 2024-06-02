@@ -3,16 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
     <title>Login</title>
 </head>
 <body>
-    <h2>Login</h2>
-    <form method="post" action="{{ url_for('login') }}">
-        <label for="login">Login:</label><br>
-        <input type="text" id="login" name="login"><br>
-        <label for="password">Password:</label><br>
-        <input type="password" id="password" name="password"><br><br>
-        <input type="submit" value="Submit">
-    </form>
+<div class="global">
+    <div class="main-container">
+        <div class="container-title">Login</div>
+        <form class="login-form" method="post" action="{{ url_for('login') }}">
+            <label class="input-form" for="login">Login:</label>
+            <input class="input-form" type="text" id="login" name="login">
+            <label class="input-form" for="password">Password:</label>
+            <input class="input-form" type="password" id="password" name="password"><br><br>
+            <input class="enter-button" type="submit" value="Enter">
+        </form>
+    </div>
+</div>
 </body>
+
+</html>
+</html>
 </html>
