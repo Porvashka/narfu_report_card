@@ -54,7 +54,14 @@ def main(token):
 
     for item in lessons_sorted:
         date_object = datetime.fromisoformat(item["start"])
-        day = str(date_object.date())
+        match date_object.weekday():
+            case 0: day = f"Понедельник {date_object.date()}"
+            case 1: day = f"Вторник {date_object.date()}"
+            case 2: day = f"Среда {date_object.date()}"
+            case 3: day = f"Четверг {date_object.date()}"
+            case 4: day = f"Пятница {date_object.date()}"
+            case 5: day = f"Суббота {date_object.date()}"
+            case 6: day = f"Воскресенье {date_object.date()}"
         if day not in grouped_data:
             grouped_data[day] = {"objects": []}
         grouped_data[day]["objects"].append(item)

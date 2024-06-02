@@ -8,6 +8,14 @@
         #hiddenDiv {
             display: none;
         }
+        .name-block{
+            padding:10px;
+            width:auto;
+            border-radius:17px;
+            background: rgba(255, 255, 255, 0.25);
+            font-family: Sans-serif;
+            font-size:25px;
+        }
     </style>
 </head>
 <body>
@@ -15,7 +23,7 @@
     <div class="left-side-block">
         <div class="name-block">Расписание</div>
         {% for day, data in grouped_data.items() %}
-        <div class="day" data-day="{{day}}" id="clickableDiv">День: {{ day }}</div>
+        <div class="day" data-day="{{day}}" id="clickableDiv">{{ day }}</div>
         {% endfor %}
     </div>
     <div class="middle-side-block" id="hiddenDiv">
@@ -27,40 +35,49 @@
     var groupedData = {{ grouped_data|tojson|safe }};
     console.log(groupedData);
     document.querySelectorAll('.day').forEach(item => {
-        item.addEventListener('click', event => {
-            var day = event.target.getAttribute('data-day'); // Здесь нужно получать значение data-day, а не просто 'day'
-            var hiddenDiv = document.getElementById('hiddenDiv');
-            console.log(day);
-            // Очищаем текущий контент
-            hiddenDiv.innerHTML = '<div class="name-block">Занятия</div>';
-
-            // Получаем данные для выбранного дня
-            var dayData = groupedData[day];
-
-            // Генерируем HTML для выбранного дня
-            if (dayData) {
-                dayData.objects.forEach(item => {
-                    var lessonHtml = `
-                    <div>
-                        <form method="post" action="{{ url_for('main', token=token) }}">
-                            <input type="hidden" name="id_lesson" value="${item.id}">
-                            <div class="lesson">
-                                <div class="top-block">${item.start.substring(11, 16)} - ${item.end.substring(11, 16)}</div>
-                                <div class="lesson-type">${item.name}</div>
-                                <p>${item['course-name']}</p>
-                                <p>id: ${item.id}</p>
-                                <button type="submit">Update</button>
-                            </div>
-                        </form>
-                    </div>`;
-                    hiddenDiv.innerHTML += lessonHtml;
-                });
-            }
-
-            // Показываем скрытый div
-            hiddenDiv.style.display = 'block';
+    item.addEventListener('click', event => {
+        // Убираем класс .active у предыдущего выбранного дня
+        document.querySelectorAll('.day.active').forEach(activeDay => {
+            activeDay.classList.remove('active');
         });
+
+        var day = event.target.getAttribute('data-day');
+        var hiddenDiv = document.getElementById('hiddenDiv');
+
+        // Очищаем текущий контент
+        hiddenDiv.innerHTML = '<div class="name-block">Занятия</div>';
+
+        // Добавляем класс .active к выбранному дню
+        event.target.classList.add('active');
+
+        // Получаем данные для выбранного дня
+        var dayData = groupedData[day];
+
+        // Генерируем HTML для выбранного дня
+        if (dayData) {
+            dayData.objects.forEach(item => {
+                var lessonHtml = `
+                <div>
+                    <form method="post" action="{{ url_for('main', token=token) }}">
+                        <input type="hidden" name="id_lesson" value="${item.id}">
+                        <div class="lesson">
+                            <div class="top-block">${item.start.substring(11, 16)} - ${item.end.substring(11, 16)}</div>
+                            <div class="lesson-type">${item.name}</div>
+                            <p>${item['course-name']}</p>
+                            <p>id: ${item.id}</p>
+                            <button type="submit">Update</button>
+                        </div>
+                    </form>
+                </div>`;
+                hiddenDiv.innerHTML += lessonHtml;
+            });
+        }
+
+        // Показываем скрытый div
+        hiddenDiv.style.display = 'inline-flex';
     });
+});
+
 </script>
 </body>
 </html>

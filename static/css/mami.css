@@ -28,11 +28,11 @@ body{
   background: rgba(255, 255, 255, 0.25)
 }
 .middle-side-block{
-  gap: 10px;
   box-sizing: border-box;
   flex-direction: column;
   justify-content: flex-start;
   align-items: flex-start;
+  gap: 10px;
   display: inline-flex;
   padding:10px;
   border-radius:17px;
@@ -65,14 +65,16 @@ body{
 .day{
   justify-content: space-between;
   padding:10px;
-  width:250px;
+  width:350px;
   border-radius:17px;
   background: rgba(255, 255, 255, 0.25);
   font-family: Sans-serif;
   font-size:25px;
 }
+.day.active {
+    background: rgba(255, 255, 255, 0.55);
+}
 .lesson{
-  margin-top:10px;
   grid-template-columns: auto 1fr; /* Два столбца одинаковой ширины */
   gap: 10px;
   padding:10px;
