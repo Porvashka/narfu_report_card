@@ -5,12 +5,15 @@ from modeusauthmodule.types import Credentials
 import httpx
 import test_date
 from datetime import datetime, timedelta
+import jwt
 
 
 def authorization(login, password):
     auth = ModeusAuthModule()
-    token = auth.login(Credentials(email = login, password = password))
+    token = auth.login(Credentials(email=login, password=password))
     return token
+
+
 def search_user(input_search, token):
     url_search = 'https://narfu.modeus.org/schedule-calendar-v2/api/people/persons/search'
     headers_to_search = {'Authorization': f"Bearer {token}", "Content-Type": 'application/json'}
@@ -39,7 +42,8 @@ def search_user(input_search, token):
             count_results = 0
         if count_results >= 2:
             keys = ['fullName', 'id']
-            print(f'Several users were found. Choose the correct one from this list and send id \n {[[fullName[key] for key in keys] for fullName in result_search["_embedded"]["persons"]]}')
+            print(
+                f'Several users were found. Choose the correct one from this list and send id \n {[[fullName[key] for key in keys] for fullName in result_search["_embedded"]["persons"]]}')
             return search_user(input_search, token)
         elif count_results == 1:
             return result_search['_embedded']['persons']
@@ -47,13 +51,17 @@ def search_user(input_search, token):
             print('Something went wrong')
             return search_user(input_search, token)
 
+
 def search_user_id(input, token):
     id_student = search_user(input, token)[0]["id"]
     return id_student
 
+
 import psycopg2
 from psycopg2.extensions import register_type, UNICODE
+
 CONN_STR = ("host='localhost' dbname='test' user='postgres' password='12345'")
+
 
 def create_table(table_name):
     register_type(UNICODE)
@@ -72,6 +80,7 @@ def create_table(table_name):
     conn.close()
     print(f"Table '{table_name}' created successfully.")
 
+
 def get_students_postgres(table_name):
     register_type(UNICODE)
     conn = psycopg2.connect(CONN_STR)
@@ -83,6 +92,7 @@ def get_students_postgres(table_name):
     cursor.close()
     conn.close()
     return results
+
 
 def add_students(table_name, data_list):
     register_type(UNICODE)
@@ -96,27 +106,31 @@ def add_students(table_name, data_list):
     conn.close()
     print(f"Table '{table_name}' successfully.")
 
-def print_lessons(input, token):
-    id_student = search_user_id(input, token)
+
+def print_lessons(id_student, token):
     url_search = 'https://narfu.modeus.org/schedule-calendar-v2/api/calendar/events/search'
     headers_to_search = {'Authorization': f"Bearer {token}", "Content-Type": 'application/json'}
-    dates = test_date.get_dates_schedule(datetime.now()+timedelta(days=5))
-    data_to_search = {"size":500,
-            "timeMin":f"{dates[0]}",
-            "timeMax":f"{dates[1]}",
-            "attendeePersonId":[f"{id_student}"]}
+    dates = test_date.get_dates_schedule(datetime.now() + timedelta(days=5))
+    data_to_search = {"size": 500,
+                      "timeMin": f"{dates[0]}",
+                      "timeMax": f"{dates[1]}",
+                      "attendeePersonId": [f"{id_student}"]}
     data_to_search = json.dumps(data_to_search)
     search = httpx.post(url=url_search, data=data_to_search, headers=headers_to_search)
     result_search = search.json()
     return result_search
 
-def get_course_unit_realization(input, token):
-    return print_lessons(input, token)['_embedded']['events'][0]['_links']['course-unit-realization']['href'][1:]  #надо разобраться с тем, что сейчас оно выводит первую пару
 
-def get_lesson_id(input, token):
-    return print_lessons(input, token)['_embedded']['events'][0]['id']
+def get_course_unit_realization(id_student, token):
+    return print_lessons(id_student, token)['_embedded']['events'][0]['_links']['course-unit-realization']['href'][
+           1:]  # надо разобраться с тем, что сейчас оно выводит первую пару
 
-def send_teacher_mark(input, token):
+
+def get_lesson_id(id_student, token):
+    return print_lessons(id_student, token)['_embedded']['events'][0]['id']
+
+
+def send_teacher_mark(input, token):  # функция не доделана, надо разобраться
     for student in get_students_postgres("0aa214e1-9d6d-46bd-a1be-84d9d4fe7688"):
         student_id = student[0]
         student_code = student[1]
@@ -127,6 +141,7 @@ def send_teacher_mark(input, token):
     data_to_search = json.dumps(data_to_search)
     search = httpx.put(url=url_search, data=data_to_search, headers=headers_to_search)
     return search.json()
+
 
 def get_students_modeus(lesson_id, token):
     url_search = f'https://narfu.modeus.org/schedule-calendar-v2/api/calendar/events/{lesson_id}/attendees'
@@ -141,17 +156,20 @@ def get_students_modeus(lesson_id, token):
             print('teacher')
     return list_students
 
-def get_student_name(student_id, token):
-    return search_user(student_id, authorization('kotkin.d1@edu.narfu.ru', 'k@to6{pUSA'))[0]['fullName']
+
+def get_user_id(token):
+    return jwt.decode(token, algorithms=['RS256'], options={'verify_signature': False})['person_id']
+
 
 if __name__ == '__main__':
     token = authorization('kotkin.d1@edu.narfu.ru', 'k@to6{pUSA')
-    paras = para = print_lessons('Коткин Денис', token)['_embedded']['events']
-    for para in paras:
-        para = para['id']
-        try:
-            create_table(para)
-            add_students(para, get_students_modeus(para, token))
-        except:
-            add_students(para, get_students_modeus(para, token))
-
+    # test = jwt.decode(token, algorithms=['RS256'], options={'verify_signature': False})['person_id']
+    # print(type(test))
+    # paras = para = print_lessons('Коткин Денис', token)['_embedded']['events']
+    # for para in paras:
+    #     para = para['id']
+    #     try:
+    #         create_table(para)
+    #         add_students(para, get_students_modeus(para, token))
+    #     except:
+    #         add_students(para, get_students_modeus(para, token))

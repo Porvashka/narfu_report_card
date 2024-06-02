@@ -1,0 +1,138 @@
+body{
+  margin:0px;
+  padding:0px;
+}
+.global{
+  left:50%;
+  width:100%;
+  height:700px;
+  padding:17px;
+  background: radial-gradient(#5887FF 0%, #3F5CA6 100%);
+  justify-content:center;
+  align-items: flex-start;
+  gap: 10px;
+  display: inline-flex;
+}
+.left-side-block{
+  box-sizing: border-box;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 10px;
+  display: inline-flex;
+  padding:10px;
+  border-radius:17px;
+  width:auto;
+  height:100%;
+  background: rgba(255, 255, 255, 0.25)
+}
+.middle-side-block{
+  gap: 10px;
+  box-sizing: border-box;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  display: inline-flex;
+  padding:10px;
+  border-radius:17px;
+  width:auto;
+  height:100%;
+  background: rgba(255, 255, 255, 0.25)
+}
+.right-side-block{
+  box-sizing: border-box;
+  position:relative;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 10px;
+  display: flex;
+  padding:10px;
+  border-radius:17px;
+  background: rgba(255, 255, 255, 0.25);
+  width:auto;
+  height:100%;
+}
+.name-block{
+  padding:10px;
+  width:auto;
+  border-radius:17px;
+  background: rgba(255, 255, 255, 0.25);
+  font-family: Sans-serif;
+  font-size:25px;
+}
+.day{
+  justify-content: space-between;
+  padding:10px;
+  width:250px;
+  border-radius:17px;
+  background: rgba(255, 255, 255, 0.25);
+  font-family: Sans-serif;
+  font-size:25px;
+}
+.lesson{
+  margin-top:10px;
+  grid-template-columns: auto 1fr; /* Два столбца одинаковой ширины */
+  gap: 10px;
+  padding:10px;
+  width:350px;
+  border-radius:17px;
+  background: rgba(255, 255, 255, 0.25);
+  font-family: Sans-serif;
+}
+.top-block{
+  display: inline-block;
+  padding:0 5px;
+  font-family:Sans-serif;
+  font-weight:bold;
+  text-decoration: underline;
+  font-size:16px;
+}
+.lesson-type{
+  max-width:50%;
+  display: inline-block;
+  background:rgba(155, 255, 75, 0.55);
+  border-radius:17px;
+  padding:0 10px;
+  font-family:Sans-serif;
+  font-weight:300;
+  font-size:16px;
+  overflow: hidden; /* Обрезка текста */
+  text-overflow: ellipsis; /* Многоточие для обрезки текста */
+  white-space: nowrap; /* Запрет на перенос текста */
+}
+.discipline-name{
+  padding:15px;
+}
+.student{
+  position:relative;
+  padding:10px;
+  width:auto;
+  border-radius:17px;
+  background: rgba(255, 255, 255, 0.25);
+  font-family: Sans-serif;
+  font-size:25px;
+  width:500px;
+  overflow: hidden; /* Обрезка текста */
+  text-overflow: ellipsis; /* Многоточие для обрезки текста */
+  white-space: nowrap; /* Запрет на перенос текста */
+  display: flex; /* Используем Flexbox */
+  align-items: center; /* Центрирование по вертикали */
+  justify-content: space-between;
+}
+.radio-button {
+  transform: scale(1.5);
+}
+.send-button{
+  font-family:Sans-serif;
+  font-size:24px;
+  border-radius:17px;
+  background: rgba(255, 255, 255, 0.75);
+  border:none;
+  box-shadow:2px 2px rgba(0, 0, 0, 0.55);
+  position:absolute;
+  width:170px;
+  height:50px;
+  right:25px;
+  bottom:25px;
+}
