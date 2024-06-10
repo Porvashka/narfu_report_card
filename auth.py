@@ -163,13 +163,13 @@ def get_user_id(token):
 
 if __name__ == '__main__':
     token = authorization('kotkin.d1@edu.narfu.ru', 'k@to6{pUSA')
-    # test = jwt.decode(token, algorithms=['RS256'], options={'verify_signature': False})['person_id']
-    # print(type(test))
-    # paras = para = print_lessons('Коткин Денис', token)['_embedded']['events']
-    # for para in paras:
-    #     para = para['id']
-    #     try:
-    #         create_table(para)
-    #         add_students(para, get_students_modeus(para, token))
-    #     except:
-    #         add_students(para, get_students_modeus(para, token))
+    test = jwt.decode(token, algorithms=['RS256'], options={'verify_signature': False})['person_id']
+    print(type(test))
+    paras = para = print_lessons(test, token)['_embedded']['events']
+    for para in paras:
+        para = para['id']
+        try:
+            create_table(para)
+            add_students(para, get_students_modeus(para, token))
+        except:
+            add_students(para, get_students_modeus(para, token))

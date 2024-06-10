@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/mami.css') }}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="{{ url_for('static', filename='js/test_main.js') }}"></script>
     <title>Список уроков</title>
     <style>
         #hiddenDiv {
@@ -29,11 +30,11 @@
     <div class="middle-side-block" id="hiddenDiv">
         <div class="name-block">Занятия</div>
     </div>
+    <div id="table-data" class="right-side-block"></div>
 </div>
 <script>
     // Преобразуем данные в JSON-формат
     var groupedData = {{ grouped_data|tojson|safe }};
-    console.log(groupedData);
     document.querySelectorAll('.day').forEach(item => {
     item.addEventListener('click', event => {
         // Убираем класс .active у предыдущего выбранного дня
@@ -52,9 +53,7 @@
 
         // Получаем данные для выбранного дня
         var dayData = groupedData[day];
-
-        // Генерируем HTML для выбранного дня
-        if (dayData) {
+          if (dayData) {
             dayData.objects.forEach(item => {
                 var lessonHtml = `
                 <div>
@@ -64,8 +63,8 @@
                             <div class="top-block">${item.start.substring(11, 16)} - ${item.end.substring(11, 16)}</div>
                             <div class="lesson-type">${item.name}</div>
                             <p>${item['course-name']}</p>
-                            <p>id: ${item.id}</p>
-                            <button type="submit">Update</button>
+                            <li><a href="#" onclick="loadTable('${item.id}')">${item.id}</a></li>
+
                         </div>
                     </form>
                 </div>`;

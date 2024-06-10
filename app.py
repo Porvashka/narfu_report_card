@@ -1,8 +1,10 @@
 from flask import Flask, request, redirect, url_for, render_template, jsonify
 import psycopg2
+import psycopg2.extras
 from auth import get_user_id, authorization, get_students_postgres, print_lessons
 from datetime import datetime
 from collections import OrderedDict
+
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key_here'
@@ -28,25 +30,8 @@ def login():
         return redirect(url_for('main', token=token))
     return render_template('login.html')
 
-
-@app.route('/marks', methods=['GET', 'POST'])
-def index(token):
-    if request.method == 'POST':
-        idd = request.form['id']
-        id_lesson = request.form['id_lesson']
-        new_data = request.form['data']
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute(f"""UPDATE hsitas."{id_lesson}" SET data = %s WHERE name_student = %s""", (new_data, idd))
-        conn.commit()
-        cursor.close()
-        conn.close()
-        return redirect(url_for(endpoint='main', token=token, _method='POST'))
-
-
 @app.route('/main/<token>', methods=['GET', 'POST'])
 def main(token):
-    # token = request.headers.get('Authorization')
     lessons = print_lessons(get_user_id(token), token)['_embedded']
     lessons_events = lessons['events']
     lessons_sorted = sorted(lessons_events, key=lambda x: x["start"])
@@ -72,17 +57,34 @@ def main(token):
                 if lesson['_links']['course-unit-realization']['href'][1:] == course_link['id']:
                     lesson['course-name'] = course_link['name']
                     break
-    if request.method == 'POST':
-        id_lesson = request.form['id_lesson']
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute(f"""SELECT name_student, data FROM hsitas."{id_lesson}";""")
-        rows = cursor.fetchall()
-        cursor.close()
-        conn.close()
-        return render_template('index.html', grouped_data=grouped_data, rows=rows, token=token, id_lesson=id_lesson)
     return render_template('index.html', grouped_data=grouped_data, token=token)
+@app.route('/table/<table_name>', methods=['GET'])
+def table(table_name):
+    conn = get_db_connection()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute(f"""SELECT id_student, name_student, data FROM hsitas."{table_name}";""")
+    records = cur.fetchall()
+    cur.close()
+    conn.close()
+    return jsonify(records)
 
+@app.route('/update', methods=['POST'])
+def update():
+    table_name = request.json['table_name']
+    record_id = request.json['id']
 
+    conn = get_db_connection()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute(f"""SELECT data FROM hsitas."{table_name}" WHERE id_student = %s""", (record_id,))
+    current_value = cur.fetchone()['data']
+
+    new_value = 'PRESENT' if current_value == 'ABSENT' else 'ABSENT'
+
+    cur.execute(f"""UPDATE hsitas."{table_name}" SET data = %s WHERE id_student = %s""", (new_value, record_id))
+    conn.commit()
+    cur.close()
+    conn.close()
+
+    return jsonify({'status': 'success', 'new_value': new_value})
 if __name__ == '__main__':
     app.run(debug=True)
